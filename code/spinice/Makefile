@@ -4,22 +4,17 @@ CXX = g++
 # CXX = icpc
 CXXFLAGS = -std=c++11 -pedantic -g -O3 -Wall
 
-INC_PATH = -I ../common
+INC_PATH = -I ../common -I /opt/homebrew/include
 
 LD = ld
 
 # Lists all object files to be made for this project
-all: seed.o seed_data.o spin.o tetra.o ewald_correlator.o ewald_rs.o spinice.o
+all: seed.o spin.o tetra.o ewald_correlator.o ewald_rs.o spinice.o
 # Clears the directory of object files
 clean:
 	rm *.o
 # Recompiles all object files by first removing them
 remake: clean all
-
-# Special object file rule: seed_data.o is just a patch of data
-# made compatible with object file structure
-seed_data.o: seed.bin
-	$(LD) -r -b binary $< -o $@
 
 # Nontrivial header dependences
 spin.o: tetra.hh

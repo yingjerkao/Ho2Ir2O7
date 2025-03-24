@@ -2,8 +2,8 @@
 
 CXX = g++
 # CXX = icpc
-CXXFLAGS = -std=c++11 -pedantic -g -O3 -Wall -no-pie
-LDFLAGS = -Wl,--gc-sections
+CXXFLAGS = -std=c++11 -pedantic -g -O3 -Wall #-no-pie
+LDFLAGS = -Wl#,--gc-sections
 
 LIBS_STD = -lstdc++ -lm
 LIBS_GSL = -lgsl -lgslcblas
@@ -14,7 +14,7 @@ SPIN_DIR = spinice
 SPIN_CC = $(wildcard $(SPIN_DIR)/*.cc)
 SPIN_O = $(patsubst %.cc,%.o,$(SPIN_CC)) $(SPIN_DIR)/seed_data.o
 
-INC_PATH = -I $(SPIN_DIR) -I common
+INC_PATH = -I $(SPIN_DIR) -I common -I /opt/homebrew/include/
 
 # Nontrivial header dependences
 sweep.o: spinice/spinice.hh spinice/basic_stat.hh
@@ -28,7 +28,7 @@ $(SPIN_DIR)/%.o:
 	$(MAKE) -C $(dir $@) $(notdir $@)
 
 # Nontrivial object dependences
-sweep.out: $(SPIN_O)
+sweep: $(SPIN_O)
 
 # Generic .o -> exec rule: uses all prerequisites (meant to be .o files)
 # explicitly: 'library' object files aren't linked unless needed

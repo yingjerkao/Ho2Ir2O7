@@ -1,6 +1,6 @@
 /* Random seed supplier implementation
  *
- * Copyright (C) 2022 Attila Szabó <attila.szabo@physics.ox.ac.uk>
+ * Copyright (C) 2024 Ying-Jer Kao <yjkao@phys.ntu.edu.tw>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License,
@@ -13,15 +13,49 @@
  */
 
 #include "seed.hh"
+#include <random>
+#include <fstream>
+#include <sstream>
+#include <stdexcept>
 
-extern uint8_t seeds[]      asm("_binary_seed_bin_start");
-extern uint8_t seeds_size[] asm("_binary_seed_bin_size");
-extern uint8_t seeds_end[]  asm("_binary_seed_bin_end");
+// Static random number generator
+static std::mt19937 rng;
+
+void init_random(const std::string& seed_file) {
+    std::ifstream file(seed_file);
+    if (!file.good()) {
+        throw std::runtime_error("Cannot open seed file: " + seed_file);
+    }
+
+    // Read the state from file
+    std::stringstream state;
+    state << file.rdbuf();
+    file.close();
+    
+    try {
+        state >> rng;
+    } catch (...) {
+        throw std::runtime_error("Invalid seed file format: " + seed_file);
+    }
+}
 
 std::uint32_t random_seed(std::size_t no) {
-    if (no < (std::size_t)((void *)seeds_size) / 4 ) 
-        return ((uint32_t*)(seeds)) [no];
-    else
-        throw "There are only so many seeds";
+    // Advance the generator based on the input number
+    for (std::size_t i = 0; i < no; ++i) {
+        rng.discard(1);
+    }
+    
+    return rng();
+}
+
+bool save_random_state(const std::string& seed_file) {
+    std::ofstream file(seed_file);
+    if (!file.good()) {
+        return false;
+    }
+    
+    file << rng;
+    file.close();
+    return true;
 }
         
